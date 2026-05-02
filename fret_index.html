@@ -1,151 +1,534 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Fret Programming Language</title>
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #0b0b0f;
-            color: #e6e6e6;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fretlang | Guitar-Driven Programming Language</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-1: #12061f;
+      --bg-2: #1d0c34;
+      --panel: rgba(255,255,255,0.09);
+      --panel-border: rgba(255,255,255,0.14);
+      --text: #f7f4ff;
+      --muted: #d5c9f5;
+      --pink: #ff4fa3;
+      --cyan: #52e5ff;
+      --gold: #ffd166;
+      --green: #65f0b5;
+      --purple: #8f6bff;
+      --shadow: 0 22px 60px rgba(0,0,0,0.35);
+    }
 
-        header {
-            text-align: center;
-            padding: 60px 20px;
-            background: linear-gradient(90deg, #00ff99, #0066ff);
-        }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: 'Space Grotesk', sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 20% 20%, rgba(255,79,163,.22), transparent 26%),
+        radial-gradient(circle at 85% 15%, rgba(82,229,255,.18), transparent 24%),
+        radial-gradient(circle at 50% 80%, rgba(143,107,255,.22), transparent 30%),
+        linear-gradient(135deg, var(--bg-1), var(--bg-2));
+      min-height: 100vh;
+    }
 
-        header h1 {
-            margin: 0;
-            font-size: 48px;
-            color: black;
-        }
+    .noise {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.05;
+      background-image: radial-gradient(#fff 0.6px, transparent 0.6px);
+      background-size: 22px 22px;
+    }
 
-        header p {
-            font-size: 18px;
-            color: black;
-        }
+    .container {
+      width: min(1120px, calc(100% - 2rem));
+      margin: 0 auto;
+    }
 
-        section {
-            max-width: 900px;
-            margin: 40px auto;
-            padding: 20px;
-            background: #151520;
-            border-radius: 12px;
-            box-shadow: 0 0 20px rgba(0,255,153,0.1);
-        }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(16px);
+      background: rgba(10, 4, 24, 0.55);
+      border-bottom: 1px solid rgba(255,255,255,0.09);
+    }
 
-        h2 {
-            color: #00ff99;
-        }
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 0;
+    }
 
-        pre {
-            background: #000;
-            padding: 15px;
-            border-radius: 8px;
-            overflow-x: auto;
-            color: #00ff99;
-        }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
 
-        .btn {
-            display: inline-block;
-            margin-top: 10px;
-            padding: 10px 15px;
-            background: #00ff99;
-            color: black;
-            text-decoration: none;
-            border-radius: 6px;
-            font-weight: bold;
-        }
+    .brand-badge {
+      width: 2.2rem;
+      height: 2.2rem;
+      border-radius: 0.8rem;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--pink), var(--purple));
+      box-shadow: 0 10px 30px rgba(255,79,163,.35);
+    }
 
-        footer {
-            text-align: center;
-            padding: 30px;
-            color: #888;
-        }
-    </style>
+    .nav-links {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .nav-links a, .button {
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 500;
+      padding: 0.8rem 1rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04);
+      transition: transform .2s ease, background .2s ease, border-color .2s ease;
+    }
+
+    .nav-links a:hover, .button:hover {
+      transform: translateY(-2px);
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.22);
+    }
+
+    .hero {
+      padding: 5.5rem 0 4rem;
+      display: grid;
+      grid-template-columns: 1.2fr 0.9fr;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.8rem, 5vw, 5rem);
+      line-height: 0.95;
+      margin: 0 0 1rem;
+    }
+
+    .gradient-text {
+      background: linear-gradient(90deg, var(--cyan), var(--gold), var(--pink));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero p {
+      font-size: 1.1rem;
+      line-height: 1.7;
+      color: var(--muted);
+      max-width: 62ch;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: 1.7rem;
+    }
+
+    .button.primary {
+      background: linear-gradient(135deg, var(--pink), var(--purple));
+      border-color: transparent;
+      box-shadow: 0 12px 30px rgba(143,107,255,.35);
+    }
+
+    .hero-card, .panel {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+    }
+
+    .hero-card {
+      padding: 1.25rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-card::before {
+      content: "";
+      position: absolute;
+      inset: auto -30% -40% auto;
+      width: 220px;
+      height: 220px;
+      background: radial-gradient(circle, rgba(82,229,255,.35), transparent 65%);
+    }
+
+    .terminal {
+      background: rgba(8, 8, 20, 0.84);
+      border-radius: 22px;
+      padding: 1rem;
+      border: 1px solid rgba(255,255,255,0.1);
+      font-family: 'JetBrains Mono', monospace;
+      line-height: 1.8;
+      color: #f2efff;
+    }
+
+    .terminal .dots {
+      display: flex;
+      gap: 0.45rem;
+      margin-bottom: 0.9rem;
+    }
+
+    .terminal .dot {
+      width: 0.7rem;
+      height: 0.7rem;
+      border-radius: 999px;
+    }
+
+    .dot.red { background: #ff6b6b; }
+    .dot.yellow { background: #ffd166; }
+    .dot.green { background: #65f0b5; }
+
+    .kw { color: var(--cyan); }
+    .num { color: var(--gold); }
+    .str { color: #ff98cd; }
+    .comment { color: #9aa0c7; }
+
+    section {
+      padding: 1rem 0 2rem;
+    }
+
+    .section-title {
+      font-size: clamp(2rem, 3vw, 3rem);
+      margin-bottom: 0.7rem;
+    }
+
+    .section-copy {
+      color: var(--muted);
+      max-width: 70ch;
+      line-height: 1.7;
+      margin-bottom: 2rem;
+    }
+
+    .grid-3, .grid-2 {
+      display: grid;
+      gap: 1.25rem;
+    }
+
+    .grid-3 { grid-template-columns: repeat(3, 1fr); }
+    .grid-2 { grid-template-columns: repeat(2, 1fr); }
+
+    .card {
+      padding: 1.4rem;
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .card h3 {
+      margin-top: 0;
+      margin-bottom: 0.6rem;
+      font-size: 1.2rem;
+    }
+
+    .card p, .card li {
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.45rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      margin-bottom: 0.8rem;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .mapping-list {
+      display: grid;
+      gap: 0.8rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.95rem;
+    }
+
+    .mapping-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.95rem 1rem;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .accent-cyan { color: var(--cyan); }
+    .accent-pink { color: #ff98cd; }
+    .accent-gold { color: var(--gold); }
+    .accent-green { color: var(--green); }
+
+    .code-block {
+      margin: 0;
+      white-space: pre-wrap;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.95rem;
+      line-height: 1.7;
+      color: #f1edff;
+      background: rgba(8, 8, 20, 0.84);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 1rem;
+      overflow-x: auto;
+    }
+
+    .footer {
+      padding: 2rem 0 4rem;
+      color: var(--muted);
+    }
+
+    .footer-box {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+      padding: 1.2rem 1.3rem;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 24px;
+    }
+
+    @media (max-width: 920px) {
+      .hero, .grid-3, .grid-2 {
+        grid-template-columns: 1fr;
+      }
+
+      .nav {
+        gap: 1rem;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
 </head>
 <body>
+  <div class="noise"></div>
 
-<header>
-    <h1>Fret Language</h1>
-    <p>A Fender Stratocaster Powered Programming Language</p>
-</header>
+  <header class="topbar">
+    <div class="container nav">
+      <div class="brand">
+        <div class="brand-badge">♫</div>
+        <span>Fretlang</span>
+      </div>
+      <nav class="nav-links">
+        <a href="#about">About</a>
+        <a href="#mapping">Mapping</a>
+        <a href="#implementation">Implementation</a>
+        <a href="#examples">Examples</a>
+        <a href="#links">Links</a>
+      </nav>
+    </div>
+  </header>
 
-<section>
-    <h2>About</h2>
-    <p>
-        Fret is a music-driven programming language where Fender Stratocaster guitar sounds
-        are converted into executable code using audio signal processing and interpretation.
-    </p>
-</section>
+  <main>
+    <section class="container hero">
+      <div>
+        <div class="pill">DSL Final Project • textX + Python</div>
+        <h1>
+          Program with a <span class="gradient-text">guitar.</span>
+        </h1>
+        <p>
+          <strong>Fretlang</strong> is a guitar-driven programming language where chords become keywords,
+          notes become letters and numbers, and guitar techniques become syntax actions.
+          The goal is to make coding feel musical, physical, colorful, and performative.
+        </p>
+        <div class="hero-actions">
+          <a class="button primary" href="#examples">See Examples</a>
+          <a class="button" href="#links">Project Links</a>
+        </div>
+      </div>
 
-<section>
-    <h2>Philosophy</h2>
-    <p>
-        Programming should be expressive like music. Fret merges guitar performance with
-        computation, allowing developers to "play code" instead of just typing it.
-    </p>
-</section>
+      <div class="hero-card">
+        <div class="terminal">
+          <div class="dots">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+          </div>
+<span class="kw">let</span> i = <span class="num">1</span>
+<span class="kw">loop</span> <span class="num">15</span> {
+    <span class="kw">if</span> i % <span class="num">15</span> == <span class="num">0</span> {
+        <span class="kw">print</span> <span class="str">FizzBuzz</span>
+    } <span class="kw">elif</span> i % <span class="num">3</span> == <span class="num">0</span> {
+        <span class="kw">print</span> <span class="str">Fizz</span>
+    } <span class="kw">elif</span> i % <span class="num">5</span> == <span class="num">0</span> {
+        <span class="kw">print</span> <span class="str">Buzz</span>
+    } <span class="kw">elif</span> i % <span class="num">1</span> == <span class="num">0</span> {
+        <span class="kw">print</span> i
+    }
+    i++
+}
+        </div>
+      </div>
+    </section>
 
-<section>
-    <h2>Syntax Example</h2>
-<pre>
-A3 = 5
-PLAY A3
+    <section id="about" class="container">
+      <h2 class="section-title">Purpose and Philosophy</h2>
+      <p class="section-copy">
+        Fretlang turns guitar performance into code. Instead of treating music and programming
+        as separate worlds, it merges them into a single playful system. Chords act like control words,
+        notes act like symbols, and performance techniques become live syntax.
+      </p>
+      <div class="grid-3">
+        <article class="card">
+          <div class="pill accent-cyan">Creative Coding</div>
+          <h3>Perform code live</h3>
+          <p>Programming becomes something you can play, hear, and perform instead of just type.</p>
+        </article>
+        <article class="card">
+          <div class="pill accent-pink">Musical Syntax</div>
+          <h3>Chords become language</h3>
+          <p>Keywords, symbols, and structure come from your guitar input and playing style.</p>
+        </article>
+        <article class="card">
+          <div class="pill accent-gold">Built to Demo</div>
+          <h3>Made for presentations</h3>
+          <p>It is visual, fun, and easy to show in a final project video, slideshow, or live demo.</p>
+        </article>
+      </div>
+    </section>
 
-LOOP 3
-    PLAY A3
-ENDLOOP
-</pre>
-</section>
+    <section id="mapping" class="container">
+      <h2 class="section-title">Mapping Overview</h2>
+      <p class="section-copy">
+        The core idea is simple: musical gestures map directly to programming meaning.
+      </p>
+      <div class="grid-2">
+        <article class="card">
+          <div class="pill accent-green">Chord Keywords</div>
+          <div class="mapping-list">
+            <div class="mapping-item"><span>Cmaj</span><strong class="accent-cyan">let</strong></div>
+            <div class="mapping-item"><span>Amin</span><strong class="accent-cyan">loop</strong></div>
+            <div class="mapping-item"><span>Gmaj</span><strong class="accent-cyan">if</strong></div>
+            <div class="mapping-item"><span>G7</span><strong class="accent-cyan">elif</strong></div>
+            <div class="mapping-item"><span>Emin</span><strong class="accent-cyan">print</strong></div>
+            <div class="mapping-item"><span>Fmaj</span><strong class="accent-cyan">end / close block</strong></div>
+          </div>
+        </article>
+        <article class="card">
+          <div class="pill accent-pink">Technique Actions</div>
+          <div class="mapping-list">
+            <div class="mapping-item"><span>double strum</span><strong class="accent-pink">{</strong></div>
+            <div class="mapping-item"><span>muted strum</span><strong class="accent-pink">}</strong></div>
+            <div class="mapping-item"><span>slide up</span><strong class="accent-pink">++</strong></div>
+            <div class="mapping-item"><span>slide down</span><strong class="accent-pink">--</strong></div>
+            <div class="mapping-item"><span>hammer-on</span><strong class="accent-pink">+</strong></div>
+            <div class="mapping-item"><span>pull-off</span><strong class="accent-pink">-</strong></div>
+            <div class="mapping-item"><span>bend</span><strong class="accent-pink">*</strong></div>
+            <div class="mapping-item"><span>harmonic</span><strong class="accent-pink">new line</strong></div>
+          </div>
+        </article>
+      </div>
+    </section>
 
-<section>
-    <h2>How It Works</h2>
-    <p>
-        1. Guitar sound is captured via microphone<br>
-        2. Pitch detection converts sound into notes<br>
-        3. Notes are mapped to programming commands<br>
-        4. Interpreter executes the program
-    </p>
-</section>
+    <section id="implementation" class="container">
+      <h2 class="section-title">Implementation</h2>
+      <p class="section-copy">
+        Fretlang is built in three major layers so live guitar input can become executable programs.
+      </p>
+      <div class="grid-3">
+        <article class="card">
+          <div class="pill">1. Token Mapper</div>
+          <h3>Musical events → tokens</h3>
+          <p>Maps note, chord, and technique events into Fretlang tokens in real time.</p>
+        </article>
+        <article class="card">
+          <div class="pill">2. textX Grammar</div>
+          <h3>Tokens → parsed structure</h3>
+          <p>Parses normalized <code>.fret</code> programs using a custom DSL grammar.</p>
+        </article>
+        <article class="card">
+          <div class="pill">3. Python Runtime</div>
+          <h3>AST → execution</h3>
+          <p>Executes variables, loops, conditionals, and print statements through the interpreter.</p>
+        </article>
+      </div>
+    </section>
 
-<section>
-    <h2>Example Programs</h2>
+    <section id="examples" class="container">
+      <h2 class="section-title">Program Examples</h2>
+      <p class="section-copy">
+        These examples show how Fretlang reads like a tiny, performance-friendly programming language.
+      </p>
+      <div class="grid-3">
+        <article class="card">
+          <div class="pill accent-gold">Hello</div>
+          <pre class="code-block">print Hello</pre>
+        </article>
+        <article class="card">
+          <div class="pill accent-cyan">Count</div>
+          <pre class="code-block">let i = 1
+loop 4 {
+    print i
+    i++
+}</pre>
+        </article>
+        <article class="card">
+          <div class="pill accent-pink">FizzBuzz</div>
+          <pre class="code-block">let i = 1
+loop 15 {
+    if i % 15 == 0 {
+        print FizzBuzz
+    } elif i % 3 == 0 {
+        print Fizz
+    } elif i % 5 == 0 {
+        print Buzz
+    } elif i % 1 == 0 {
+        print i
+    }
+    i++
+}</pre>
+        </article>
+      </div>
+    </section>
 
-    <h3>Hello World</h3>
-    <pre>
-A3 = 5
-PLAY A3
-    </pre>
+    <section id="links" class="container">
+      <h2 class="section-title">Submission Links</h2>
+      <p class="section-copy">
+        Replace these placeholders after you upload your project to GitHub and enable GitHub Pages.
+      </p>
+      <div class="grid-2">
+        <article class="card">
+          <div class="pill">Live Website</div>
+          <p><a class="button" href="#">ADD_GITHUB_PAGES_URL_HERE</a></p>
+        </article>
+        <article class="card">
+          <div class="pill">Git Source Code</div>
+          <p><a class="button" href="#">ADD_GITHUB_REPO_URL_HERE</a></p>
+        </article>
+      </div>
+    </section>
+  </main>
 
-    <h3>FizzBuzz Concept</h3>
-    <pre>
-A3 = 1
-PLAY A3
-PLAY FIZZ
-PLAY BUZZ
-    </pre>
-</section>
-
-<section>
-    <h2>Interpreter</h2>
-    <p>
-        The interpreter is written in Python and supports variables,
-        loops, conditionals, and audio-based input parsing.
-    </p>
-</section>
-
-<section>
-    <h2>GitHub</h2>
-    <a class="btn" href="#">View Source Code</a>
-</section>
-
-<footer>
-    Created for Final Programming Language Project – Fret 🎸
-</footer>
-
+  <footer class="container footer">
+    <div class="footer-box">
+      <strong>Fretlang — Guitar Programming Language Project</strong>
+      <span>Built with textX + Python</span>
+    </div>
+  </footer>
 </body>
 </html>
+
